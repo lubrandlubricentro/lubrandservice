@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -96,37 +97,43 @@ input[type=file]{display:none}
 <script>
 // ── DB ────────────────────────────────────────────────────────────────────────
 var DB = {clientes:[],vehiculos:[],servicios:[],turnos:[],cuentas:[]};
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydATOjZHRKIcJ4fw3WhHt6lJeHmNapxVtbTRK-2YEsuQKJSpX2FpM6I4cz_jPQqwhy/exec';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4WeBvgEn8f6knk10wfkMGtDtQQTWavKXijpXRvC8sEf4ypdgGBTMY7653ezTOV5Ac/exec';
 var saving = false;
 
 function loadDB(){
   document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:#8892a4">⏳ Cargando datos...</div>';
-  fetch(SCRIPT_URL+'?action=get')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(data.clientes)DB.clientes=data.clientes;
-      if(data.vehiculos)DB.vehiculos=data.vehiculos;
-      if(data.servicios)DB.servicios=data.servicios;
-      if(data.turnos)DB.turnos=data.turnos;
-      if(data.cuentas)DB.cuentas=data.cuentas;
-      render();
-    })
-    .catch(function(e){
-      console.log('Error cargando:',e);
-      render();
-    });
+  // Use no-cors mode with fetch
+  fetch(SCRIPT_URL+'?callback=onData', {mode:'no-cors'})
+    .catch(function(){});
+  // Load via script tag to avoid CORS
+  var s=document.createElement('script');
+  s.src=SCRIPT_URL+'?callback=onData&t='+Date.now();
+  document.head.appendChild(s);
+  setTimeout(function(){render();},3000);
+}
+
+function onData(data){
+  if(data.clientes)DB.clientes=data.clientes;
+  if(data.vehiculos)DB.vehiculos=data.vehiculos;
+  if(data.servicios)DB.servicios=data.servicios;
+  if(data.turnos)DB.turnos=data.turnos;
+  if(data.cuentas)DB.cuentas=data.cuentas;
+  render();
 }
 
 function saveDB(){
   if(saving)return;
   saving=true;
-  fetch(SCRIPT_URL, {
-    method:'POST',
-    body:JSON.stringify({action:'save',clientes:DB.clientes,vehiculos:DB.vehiculos,servicios:DB.servicios,turnos:DB.turnos,cuentas:DB.cuentas})
-  })
-  .then(function(r){return r.json();})
-  .then(function(){saving=false;})
-  .catch(function(e){saving=false;console.log('Error guardando:',e);});
+  var data=JSON.stringify({clientes:DB.clientes,vehiculos:DB.vehiculos,servicios:DB.servicios,turnos:DB.turnos,cuentas:DB.cuentas});
+  // Save via form POST to avoid CORS
+  var f=document.createElement('form');
+  f.method='POST';f.action=SCRIPT_URL;f.target='save-frame';f.style.display='none';
+  var i=document.createElement('input');i.name='contents';i.value=data;
+  f.appendChild(i);document.body.appendChild(f);
+  var fr=document.createElement('iframe');fr.name='save-frame';fr.style.display='none';
+  document.body.appendChild(fr);
+  f.submit();
+  setTimeout(function(){saving=false;f.remove();fr.remove();},2000);
 }
 function exportar(){
   var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
