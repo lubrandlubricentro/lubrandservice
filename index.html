@@ -1,52 +1,688 @@
-var ID = '1_IvA57dmqkWoct7XmhFYjJzxymfeBLawH6G-eiT0NlA';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LubrandService</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;font-family:'Segoe UI',system-ui,sans-serif;color:#f0f0f0;min-height:100vh}
+.header{background:#1a1e2e;border-bottom:1px solid #252a3d;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-name{font-weight:800;font-size:17px;color:#f5a623}
+.logo-sub{font-size:11px;color:#8892a4}
+.header-btns{display:flex;gap:8px;align-items:center}
+.btn-exp{background:#22c55e22;border:1px solid #22c55e;border-radius:8px;color:#22c55e;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.btn-imp{background:#3b82f622;border:1px solid #3b82f6;border-radius:8px;color:#3b82f6;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.alerta-badge{background:#ef4444;color:#fff;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;display:none}
+.nav{background:#1a1e2e;border-bottom:1px solid #252a3d;display:flex;overflow-x:auto}
+.nav-btn{background:none;border:none;border-bottom:2px solid transparent;color:#8892a4;padding:12px 16px;cursor:pointer;font-weight:400;font-size:13px;white-space:nowrap}
+.nav-btn.active{color:#f5a623;border-bottom-color:#f5a623;font-weight:700}
+.content{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+.card{background:#1a1e2e;border:1px solid #252a3d;border-radius:16px;padding:20px;margin-bottom:12px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.stat{flex:1;min-width:120px;background:#1a1e2e;border:1px solid #252a3d;border-radius:16px;padding:18px}
+.btn{border:none;border-radius:8px;padding:9px 20px;font-weight:700;font-size:14px;cursor:pointer;display:inline-block}
+.btn-acc{background:#f5a623;color:#111}
+.btn-grn{background:#22c55e;color:#fff}
+.btn-red{background:#ef4444;color:#fff}
+.btn-blu{background:#3b82f6;color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-wa{background:#25D36622;border:1px solid #25D366;border-radius:8px;color:#25D366;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.ff{display:flex;flex-direction:column;gap:5px;font-size:13px;color:#8892a4}
+.ff input,.ff select{background:#111420;border:1px solid #252a3d;border-radius:8px;padding:8px 12px;color:#f0f0f0;font-size:14px;outline:none;width:100%}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tipo-btn{background:#111420;border:1px solid #252a3d;border-radius:8px;padding:6px 12px;font-size:13px;color:#8892a4;cursor:pointer}
+.tipo-btn.sel{background:#f5a623;border-color:#f5a623;color:#111;font-weight:700}
+.overlay{position:fixed;inset:0;background:#000c;z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal{background:#1a1e2e;border:1px solid #252a3d;border-radius:20px;padding:24px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto}
+.modal.wide{max-width:680px}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.mtitle{color:#f5a623;font-size:18px;font-weight:700}
+.mclose{background:none;border:none;color:#8892a4;font-size:22px;cursor:pointer}
+.badge{padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;display:inline-block}
+.bg{background:#22c55e22;color:#22c55e}
+.br{background:#ef444422;color:#ef4444}
+.by{background:#f5a62322;color:#f5a623}
+.bb{background:#3b82f622;color:#3b82f6}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vcard{background:#111420;border-radius:10px;padding:10px 14px;font-size:13px;min-width:160px;border-left:3px solid #252a3d}
+.vcard.al{border-left-color:#f5a623}
+input[type=file]{display:none}
+.inf{font-size:11px;color:#8892a4;font-style:italic;margin-top:4px}
+</style>
+</head>
+<body>
 
-function doGet(e) {
-  var ss = SpreadsheetApp.openById(ID);
-  var r = {clientes:[],vehiculos:[],servicios:[],turnos:[],cuentas:[]};
-  var names = ['clientes','vehiculos','servicios','turnos','cuentas'];
-  for (var n = 0; n < names.length; n++) {
-    var name = names[n];
-    var sh = ss.getSheetByName(name);
-    if (!sh) { ss.insertSheet(name); continue; }
-    var vals = sh.getDataRange().getValues();
-    if (vals.length < 2) continue;
-    var hdr = vals[0];
-    for (var i = 1; i < vals.length; i++) {
-      var obj = {};
-      for (var j = 0; j < hdr.length; j++) {
-        var v = vals[i][j];
-        try { v = JSON.parse(v); } catch(x) {}
-        obj[hdr[j]] = v;
-      }
-      r[name].push(obj);
-    }
-  }
-  return ContentService.createTextOutput(JSON.stringify(r)).setMimeType(ContentService.MimeType.JSON);
+<div class="header">
+  <div class="logo">
+    <svg width="26" height="32" viewBox="0 0 100 115">
+      <path d="M28 5L28 78Q28 88 40 88L78 88L78 102Q78 112 66 112L28 112Q12 112 12 96L12 5Z" fill="#c0392b"/>
+      <path d="M28 72L28 96Q28 112 44 112L82 112Q98 112 98 96L98 88Q98 76 84 76L42 76Q28 76 28 72Z" fill="#1ab6d4"/>
+    </svg>
+    <div>
+      <div class="logo-name">LubrandService</div>
+      <div class="logo-sub">Lubrand Lubricentro</div>
+    </div>
+  </div>
+  <div class="header-btns">
+    <span id="badge-alertas" class="alerta-badge"></span>
+    <button class="btn-exp" onclick="exportar()">💾 Exportar</button>
+    <label class="btn-imp">📂 Importar<input type="file" accept=".json" onchange="importar(this)"></label>
+  </div>
+</div>
+
+<div class="nav" id="nav">
+  <button class="nav-btn active" onclick="goTab('panel',this)">🏠 Panel</button>
+  <button class="nav-btn" onclick="goTab('clientes',this)">👥 Clientes</button>
+  <button class="nav-btn" onclick="goTab('servicios',this)">🔧 Servicios</button>
+  <button class="nav-btn" onclick="goTab('turnos',this)">📅 Turnos</button>
+  <button class="nav-btn" onclick="goTab('facturacion',this)">💰 Facturación</button>
+  <button class="nav-btn" onclick="goTab('cuentas',this)">💼 Cuentas</button>
+</div>
+
+<div class="content" id="content"></div>
+
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" id="mbox">
+    <div class="mhead">
+      <div class="mtitle" id="mtitle"></div>
+      <button class="mclose" onclick="closeModal()">✕</button>
+    </div>
+    <div id="mbody"></div>
+  </div>
+</div>
+
+<script>
+// ── DB ────────────────────────────────────────────────────────────────────────
+var DB = {clientes:[],vehiculos:[],servicios:[],turnos:[],cuentas:[]};
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydATOjZHRKIcJ4fw3WhHt6lJeHmNapxVtbTRK-2YEsuQKJSpX2FpM6I4cz_jPQqwhy/exec';
+var saving = false;
+
+function loadDB(){
+  document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:#8892a4">⏳ Cargando datos...</div>';
+  fetch(SCRIPT_URL+'?action=get')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.clientes)DB.clientes=data.clientes;
+      if(data.vehiculos)DB.vehiculos=data.vehiculos;
+      if(data.servicios)DB.servicios=data.servicios;
+      if(data.turnos)DB.turnos=data.turnos;
+      if(data.cuentas)DB.cuentas=data.cuentas;
+      render();
+    })
+    .catch(function(e){
+      console.log('Error cargando:',e);
+      render();
+    });
 }
 
-function doPost(e) {
-  var d = JSON.parse(e.postData.contents);
-  var ss = SpreadsheetApp.openById(ID);
-  var names = ['clientes','vehiculos','servicios','turnos','cuentas'];
-  for (var n = 0; n < names.length; n++) {
-    var name = names[n];
-    if (!d[name]) continue;
-    var sh = ss.getSheetByName(name);
-    if (!sh) sh = ss.insertSheet(name);
-    sh.clearContents();
-    var items = d[name];
-    if (!items.length) continue;
-    var hdr = Object.keys(items[0]);
-    var rows = [hdr];
-    for (var i = 0; i < items.length; i++) {
-      var row = [];
-      for (var j = 0; j < hdr.length; j++) {
-        var v = items[i][hdr[j]];
-        row.push(typeof v === 'object' ? JSON.stringify(v) : (v !== undefined ? v : ''));
-      }
-      rows.push(row);
-    }
-    sh.getRange(1, 1, rows.length, hdr.length).setValues(rows);
-  }
-  return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
+function saveDB(){
+  if(saving)return;
+  saving=true;
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    body:JSON.stringify({action:'save',clientes:DB.clientes,vehiculos:DB.vehiculos,servicios:DB.servicios,turnos:DB.turnos,cuentas:DB.cuentas})
+  })
+  .then(function(r){return r.json();})
+  .then(function(){saving=false;})
+  .catch(function(e){saving=false;console.log('Error guardando:',e);});
 }
+function exportar(){
+  var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lubrandservice-backup.json';a.click();
+}
+function importar(inp){
+  var file=inp.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{var d=JSON.parse(e.target.result);
+      for(var k in d){if(DB[k]!==undefined)DB[k]=d[k];}
+      saveDB();render();alert('✅ Datos importados!');
+    }catch(x){alert('Error al importar.');}
+  };
+  r.readAsText(file);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+var uid=function(){return Date.now()+''+Math.floor(Math.random()*9999);};
+var today=function(){return new Date().toISOString().slice(0,10);};
+var ddiff=function(d){return Math.ceil((new Date(d)-new Date())/86400000);};
+var fmtF=function(d){if(!d)return'—';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];};
+var fmtK=function(k){return k?Number(k).toLocaleString('es-AR')+' km':'—';};
+var fmt$=function(n){return '$'+Number(n||0).toLocaleString('es-AR');};
+var TIPOS=['Cambio de aceite','Filtro de aceite','Filtro de aire','Filtro de habitáculo','Filtro de combustible','Lubricación','Revisión general','Cambio de pastillas','Alineación','Otro'];
+var SERVS=['Cambio de aceite','Cambio de filtros','Revisión general','Lubricación','Otro'];
+var tiposSel=[];
+var remitoId='';
+
+function wa(tel,msg){
+  if(!tel){alert('Sin teléfono cargado.');return;}
+  var t=tel.replace(/[^0-9]/g,'');
+  var c=t.startsWith('54')?t:'54'+t;
+  window.open('https://wa.me/'+c+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(title,body,wide){
+  document.getElementById('mtitle').textContent=title;
+  document.getElementById('mbody').innerHTML=body;
+  document.getElementById('mbox').className=wide?'modal wide':'modal';
+  document.getElementById('overlay').style.display='flex';
+}
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('overlay'))return;
+  document.getElementById('overlay').style.display='none';
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+var tabActual='panel';
+function goTab(tab,btn){
+  tabActual=tab;
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  render();
+}
+function render(){
+  updateBadge();
+  if(tabActual==='panel')renderPanel();
+  else if(tabActual==='clientes')renderClientes();
+  else if(tabActual==='servicios')renderServicios();
+  else if(tabActual==='turnos')renderTurnos();
+  else if(tabActual==='facturacion')renderFact();
+  else if(tabActual==='cuentas')renderCuentas();
+}
+function updateBadge(){
+  var n=DB.servicios.filter(function(s){return s.proximaFecha&&ddiff(s.proximaFecha)<=30;}).length;
+  var el=document.getElementById('badge-alertas');
+  if(n>0){el.style.display='';el.textContent=n+' alertas';}
+  else el.style.display='none';
+}
+
+// ── PANEL ─────────────────────────────────────────────────────────────────────
+function renderPanel(){
+  var hoy=today();
+  var th=DB.turnos.filter(function(t){return t.fecha===hoy&&t.estado==='pendiente';});
+  var venc=DB.servicios.filter(function(s){return s.proximaFecha&&ddiff(s.proximaFecha)<0;});
+  var prox=DB.servicios.filter(function(s){return s.proximaFecha&&ddiff(s.proximaFecha)>=0&&ddiff(s.proximaFecha)<=30;});
+  var h='<div class="stats">';
+  [{i:'👥',l:'Clientes',v:DB.clientes.length,c:'#f5a623'},{i:'🚗',l:'Vehículos',v:DB.vehiculos.length,c:'#f5a623'},{i:'🔧',l:'Servicios',v:DB.servicios.length,c:'#f5a623'},{i:'📅',l:'Turnos hoy',v:th.length,c:'#3b82f6'}].forEach(function(s){
+    h+='<div class="stat"><div style="font-size:22px">'+s.i+'</div><div style="font-size:26px;font-weight:800;color:'+s.c+';margin-top:4px">'+s.v+'</div><div style="font-size:12px;color:#8892a4">'+s.l+'</div></div>';
+  });
+  h+='</div>';
+  if(th.length>0){
+    h+='<div class="card" style="border-color:#3b82f6"><div style="color:#3b82f6;font-weight:700;margin-bottom:10px">📅 Turnos de hoy</div>';
+    th.forEach(function(t){var c=DB.clientes.find(function(x){return x.id===t.clienteId;})||{};var v=DB.vehiculos.find(function(x){return x.id===t.vehiculoId;})||{};h+='<div style="background:#111420;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px"><strong>'+t.hora+' — '+(c.nombre||'')+'</strong><div style="color:#8892a4">'+(v.marca||'')+' '+(v.modelo||'')+' | '+t.servicio+'</div></div>';});
+    h+='</div>';
+  }
+  if(venc.length||prox.length){
+    h+='<div class="card" style="border-color:#f5a623"><div style="color:#f5a623;font-weight:700;margin-bottom:10px">⚠️ Alertas de servicio</div>';
+    venc.forEach(function(s){var v=DB.vehiculos.find(function(x){return x.id===s.vehiculoId;})||{};h+='<div style="background:#ef444415;border-radius:8px;padding:7px 12px;margin-bottom:5px;font-size:13px"><span class="badge br">VENCIDO</span> <strong>'+(v.patente||'')+' '+(v.marca||'')+' '+(v.modelo||'')+'</strong><div style="color:#8892a4">Venció el '+s.proximaFecha+'</div></div>';});
+    prox.forEach(function(s){var v=DB.vehiculos.find(function(x){return x.id===s.vehiculoId;})||{};h+='<div style="background:#f5a62315;border-radius:8px;padding:7px 12px;margin-bottom:5px;font-size:13px"><span class="badge by">'+ddiff(s.proximaFecha)+'d</span> <strong>'+(v.patente||'')+' '+(v.marca||'')+' '+(v.modelo||'')+'</strong><div style="color:#8892a4">Vence '+s.proximaFecha+'</div></div>';});
+    h+='</div>';
+  }
+  if(!th.length&&!venc.length&&!prox.length)h+='<div class="card" style="text-align:center;color:#8892a4;padding:30px">✅ Todo en orden</div>';
+  document.getElementById('content').innerHTML=h;
+}
+
+// ── CLIENTES ──────────────────────────────────────────────────────────────────
+var cliSearch='';
+function renderClientes(){
+  var list=DB.clientes.filter(function(c){return (c.nombre||'').toLowerCase().includes(cliSearch.toLowerCase())||(c.telefono||'').includes(cliSearch);});
+  var h='<div class="row" style="justify-content:space-between;margin-bottom:16px">'
+    +'<div style="font-weight:700;font-size:16px">👥 Clientes</div>'
+    +'<div class="row" style="gap:8px">'
+    +'<input placeholder="Buscar..." style="background:#111420;border:1px solid #252a3d;border-radius:8px;padding:8px 12px;color:#f0f0f0;font-size:14px;outline:none;width:150px" oninput="cliSearch=this.value;renderClientes()" value="'+cliSearch+'">'
+    +'<button class="btn btn-acc" onclick="abrirCli()">+ Cliente</button>'
+    +'</div></div>';
+  if(!list.length)h+='<div class="card" style="text-align:center;color:#8892a4;padding:30px">No hay clientes aún.</div>';
+  list.forEach(function(c){
+    var vehs=DB.vehiculos.filter(function(v){return v.clienteId===c.id;});
+    h+='<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px">'
+      +'<div><div style="font-weight:700;font-size:16px">'+(c.nombre||'Sin nombre')+'</div>'
+      +'<div style="color:#8892a4;font-size:13px">📞 '+(c.telefono||'—')+(c.email?' • ✉️ '+c.email:'')+'</div></div>'
+      +'<div class="row" style="gap:6px">'
+      +'<button class="btn btn-blu btn-sm" onclick="abrirCli(\''+c.id+'\')">Editar</button>'
+      +'<button class="btn btn-grn btn-sm" onclick="abrirVeh(\'\',\''+c.id+'\')">+ Vehículo</button>'
+      +'<button class="btn btn-red btn-sm" onclick="delCli(\''+c.id+'\')">✕</button>'
+      +'</div></div>';
+    if(vehs.length){
+      h+='<div class="row" style="gap:8px;flex-wrap:wrap">';
+      vehs.forEach(function(v){
+        var ult=DB.servicios.filter(function(s){return s.vehiculoId===v.id;}).sort(function(a,b){return b.fecha.localeCompare(a.fecha);})[0];
+        var al=ult&&ult.proximaFecha&&ddiff(ult.proximaFecha)<=30;
+        h+='<div class="vcard'+(al?' al':'')+'">'
+          +'<div class="row" style="justify-content:space-between">'
+          +'<span style="font-weight:700">'+(v.patente||'Sin patente')+'</span>'
+          +'<button class="btn btn-blu btn-sm" onclick="abrirVeh(\''+v.id+'\',\''+c.id+'\')">Editar</button>'
+          +'</div>'
+          +'<div style="color:#8892a4">'+(v.marca||'')+' '+(v.modelo||'')+' '+(v.año||'')+'</div>'
+          +'<div style="color:#8892a4">🔢 '+Number(v.km||0).toLocaleString()+' km</div>'
+          +(ult&&ult.proximaFecha?'<div style="color:'+(al?'#f5a623':'#8892a4')+';font-size:11px;margin-top:4px">Próx: '+ult.proximaFecha+'</div>':'')
+          +'</div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  document.getElementById('content').innerHTML=h;
+}
+function abrirCli(id){
+  var c=id?DB.clientes.find(function(x){return x.id==id;})||{}:{};
+  openModal(id?'Editar Cliente':'Nuevo Cliente',
+    '<div style="display:flex;flex-direction:column;gap:12px">'
+    +'<div class="ff"><label>Nombre</label><input id="fn" value="'+(c.nombre||'')+'"></div>'
+    +'<div class="ff"><label>Teléfono</label><input id="ft" value="'+(c.telefono||'')+'"></div>'
+    +'<div class="ff"><label>Email</label><input id="fe" value="'+(c.email||'')+'"></div>'
+    +'<button class="btn btn-acc" style="margin-top:8px" onclick="saveCli(\''+id+'\')">Guardar</button>'
+    +'</div>');
+}
+function saveCli(id){
+  var o={nombre:document.getElementById('fn').value,telefono:document.getElementById('ft').value,email:document.getElementById('fe').value};
+  if(id)DB.clientes=DB.clientes.map(function(c){return c.id==id?Object.assign({},c,o):c;});
+  else DB.clientes.push(Object.assign({id:uid()},o));
+  saveDB();closeModal();renderClientes();
+}
+function delCli(id){
+  if(!confirm('¿Eliminar cliente?'))return;
+  DB.clientes=DB.clientes.filter(function(c){return c.id!=id;});
+  DB.vehiculos=DB.vehiculos.filter(function(v){return v.clienteId!=id;});
+  saveDB();renderClientes();
+}
+function abrirVeh(vid,cid){
+  var v=vid?DB.vehiculos.find(function(x){return x.id==vid;})||{}:{};
+  var c=DB.clientes.find(function(x){return x.id==cid;})||{};
+  openModal(vid?'Editar Vehículo':'Nuevo Vehículo — '+(c.nombre||''),
+    '<div style="display:flex;flex-direction:column;gap:12px">'
+    +'<div class="ff"><label>Patente</label><input id="fp" value="'+(v.patente||'')+'" style="text-transform:uppercase"></div>'
+    +'<div class="fg">'
+    +'<div class="ff"><label>Marca</label><input id="fm" value="'+(v.marca||'')+'"></div>'
+    +'<div class="ff"><label>Modelo</label><input id="fmo" value="'+(v.modelo||'')+'"></div>'
+    +'<div class="ff"><label>Año</label><input id="fa" type="number" value="'+(v.año||'')+'"></div>'
+    +'<div class="ff"><label>KM</label><input id="fk" type="number" value="'+(v.km||'')+'"></div>'
+    +'</div>'
+    +'<button class="btn btn-acc" style="margin-top:8px" onclick="saveVeh(\''+vid+'\',\''+cid+'\')">Guardar</button>'
+    +'</div>');
+}
+function saveVeh(vid,cid){
+  var o={patente:document.getElementById('fp').value.toUpperCase(),marca:document.getElementById('fm').value,modelo:document.getElementById('fmo').value,año:document.getElementById('fa').value,km:document.getElementById('fk').value};
+  if(vid)DB.vehiculos=DB.vehiculos.map(function(v){return v.id==vid?Object.assign({},v,o):v;});
+  else DB.vehiculos.push(Object.assign({id:uid(),clienteId:cid},o));
+  saveDB();closeModal();renderClientes();
+}
+
+// ── SERVICIOS ─────────────────────────────────────────────────────────────────
+var srvSearch='';
+function renderServicios(){
+  var list=DB.servicios.filter(function(s){
+    if(!srvSearch)return true;
+    var v=DB.vehiculos.find(function(x){return x.id===s.vehiculoId;})||{};
+    var c=DB.clientes.find(function(x){return x.id===v.clienteId;})||{};
+    return (v.patente||'').includes(srvSearch.toUpperCase())||(c.nombre||'').toLowerCase().includes(srvSearch.toLowerCase());
+  }).sort(function(a,b){return b.fecha.localeCompare(a.fecha);});
+  var h='<div class="row" style="justify-content:space-between;margin-bottom:16px">'
+    +'<div style="font-weight:700;font-size:16px">🔧 Servicios</div>'
+    +'<div class="row" style="gap:8px">'
+    +'<input placeholder="Filtrar..." style="background:#111420;border:1px solid #252a3d;border-radius:8px;padding:8px 12px;color:#f0f0f0;font-size:14px;outline:none;width:140px" oninput="srvSearch=this.value;renderServicios()" value="'+srvSearch+'">'
+    +'<button class="btn btn-acc" onclick="abrirSrv()">+ Servicio</button>'
+    +'</div></div>';
+  if(!list.length)h+='<div class="card" style="text-align:center;color:#8892a4;padding:30px">Sin servicios registrados.</div>';
+  list.forEach(function(s){
+    var v=DB.vehiculos.find(function(x){return x.id===s.vehiculoId;})||{};
+    var c=DB.clientes.find(function(x){return x.id===v.clienteId;})||{};
+    var d=s.proximaFecha?ddiff(s.proximaFecha):null;
+    var msgS=buildMsgSrv(s,c,v);
+    h+='<div class="card">'
+      +'<div class="row" style="justify-content:space-between">'
+      +'<div>'
+      +'<div class="row" style="gap:8px;margin-bottom:4px"><span style="font-weight:700">'+(s.tipo||'Servicio')+'</span>'
+      +(d!==null&&d<0?'<span class="badge br">Vencido</span>':'')
+      +(d!==null&&d>=0&&d<=30?'<span class="badge by">'+d+'d</span>':'')
+      +(d!==null&&d>30?'<span class="badge bg">Al día</span>':'')
+      +'</div>'
+      +'<div style="color:#8892a4;font-size:13px">'+(c.nombre||'')+' • '+(v.patente||'')+' '+(v.marca||'')+' '+(v.modelo||'')+'</div>'
+      +'<div style="color:#8892a4;font-size:12px;margin-top:3px">📅 '+s.fecha+' • 🔢 '+Number(s.km||0).toLocaleString()+' km'+(s.detalle?' • '+s.detalle:'')+'</div>'
+      +(s.proximaFecha?'<div style="font-size:12px;color:'+(d<0?'#ef4444':d<=30?'#f5a623':'#22c55e')+';margin-top:3px">Próx: '+fmtF(s.proximaFecha)+(s.proximoKm?' ('+fmtK(s.proximoKm)+')':'')+'</div>':'')
+      +(s.costo?'<div style="font-size:13px;color:#22c55e;font-weight:700;margin-top:3px">💲 '+fmt$(s.costo)+'</div>':'')
+      +'</div>'
+      +'<div class="row" style="gap:6px">'
+      +'<button class="btn btn-blu btn-sm" onclick="abrirRemito(\''+s.id+'\')">🧾 Remito</button>'
+      +'<button class="btn-wa" onclick="wa(\''+encodeURI(c.telefono||'')+'\',decodeURI(\''+encodeURI(msgS)+'\'))"><svg width="13" height="13" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp</button>'
+      +'</div></div></div>';
+  });
+  document.getElementById('content').innerHTML=h;
+}
+function buildMsgSrv(s,c,v){
+  var tipos=s.tipos&&s.tipos.length?s.tipos:[s.tipo||'Servicio general'];
+  var items=tipos.map(function(t){return '• '+t;}).join('\n');
+  return '👋 Hola '+( c.nombre||'')+', te informamos que el servicio de tu '+(v.marca||'vehículo')+(v.modelo?' '+v.modelo:'')+(v.patente?' ('+v.patente+')':'')+' fue realizado el *'+s.fecha+'*.\n\n*Servicios realizados:*\n'+items+(s.detalle?'\n\n*Detalle:* '+s.detalle:'')+(s.proximaFecha?'\n\n⚠️ *Próximo service:* '+fmtF(s.proximaFecha)+(s.proximoKm?' / '+fmtK(s.proximoKm):''):'')+'\n\nGracias por elegirnos 🛢️ *Lubrand Lubricentro*\n\n_Mensaje automático, no responder._';
+}
+function abrirSrv(prefill){
+  tiposSel=prefill?[prefill]:[];
+  var opts=DB.vehiculos.map(function(v){var c=DB.clientes.find(function(x){return x.id===v.clienteId;})||{};return '<option value="'+v.id+'">'+(v.patente||'')+' — '+(v.marca||'')+' '+(v.modelo||'')+' ('+(c.nombre||'')+')</option>';}).join('');
+  var tbh=TIPOS.map(function(t){return '<button class="tipo-btn'+(tiposSel.includes(t)?' sel':'')+'" onclick="togTipo(\''+t+'\')">'+(tiposSel.includes(t)?'✓ ':'')+t+'</button>';}).join('');
+  openModal('Registrar Servicio',
+    '<div style="display:flex;flex-direction:column;gap:14px">'
+    +'<div class="ff"><label>Vehículo</label><select id="sv"><option value="">— Seleccionar —</option>'+opts+'</select></div>'
+    +'<div><div style="font-size:13px;color:#8892a4;margin-bottom:8px">Servicios realizados</div><div id="tgrid" style="display:flex;flex-wrap:wrap;gap:8px">'+tbh+'</div></div>'
+    +'<div class="fg">'
+    +'<div class="ff"><label>Fecha</label><input type="date" id="sf" value="'+today()+'" oninput="autoF(this.value)"></div>'
+    +'<div class="ff"><label>KM actuales</label><input type="number" id="sk" oninput="autoK(this.value)"></div>'
+    +'<div class="ff"><label>Próximo (fecha)</label><input type="date" id="spf"></div>'
+    +'<div class="ff"><label>Próximo (km)</label><input type="number" id="spk"></div>'
+    +'</div>'
+    +'<div class="ff"><label>Detalle / producto</label><input id="sd"></div>'
+    +'<div class="ff"><label>💲 Valor cobrado ($)</label><input type="number" id="sc"></div>'
+    +'<button class="btn btn-acc" style="margin-top:4px" onclick="saveSrv()">✅ Guardar</button>'
+    +'</div>');
+  autoF(today());
+}
+function togTipo(t){
+  var idx=tiposSel.indexOf(t);
+  if(idx>=0)tiposSel.splice(idx,1);else tiposSel.push(t);
+  var tbh=TIPOS.map(function(x){return '<button class="tipo-btn'+(tiposSel.includes(x)?' sel':'')+'" onclick="togTipo(\''+x+'\')">'+(tiposSel.includes(x)?'✓ ':'')+x+'</button>';}).join('');
+  document.getElementById('tgrid').innerHTML=tbh;
+}
+function autoF(f){if(!f)return;var d=new Date(new Date(f).getTime()+365*24*60*60*1000);document.getElementById('spf').value=d.toISOString().slice(0,10);}
+function autoK(k){if(!k)return;var el=document.getElementById('spk');if(el)el.value=String(Number(k)+10000);}
+function saveSrv(){
+  var vid=document.getElementById('sv').value;
+  var fecha=document.getElementById('sf').value;
+  if(!vid||!fecha){alert('Seleccioná vehículo y fecha.');return;}
+  var tipo=tiposSel.length?tiposSel.join(' + '):'Servicio general';
+  var s={id:uid(),vehiculoId:vid,fecha:fecha,tipo:tipo,tipos:tiposSel.slice(),
+    km:document.getElementById('sk').value,detalle:document.getElementById('sd').value,
+    costo:document.getElementById('sc').value,
+    proximaFecha:document.getElementById('spf').value,
+    proximoKm:document.getElementById('spk').value,estado:'completado'};
+  DB.servicios.push(s);
+  if(s.km)DB.vehiculos=DB.vehiculos.map(function(v){return v.id==vid?Object.assign({},v,{km:s.km}):v;});
+  saveDB();closeModal();renderServicios();
+}
+
+// ── REMITO ────────────────────────────────────────────────────────────────────
+function abrirRemito(srvId){
+  remitoId=srvId;
+  var s=DB.servicios.find(function(x){return x.id==srvId;});
+  if(!s){alert('Servicio no encontrado.');return;}
+  var v=DB.vehiculos.find(function(x){return x.id===s.vehiculoId;})||{};
+  var c=DB.clientes.find(function(x){return x.id===v.clienteId;})||{};
+  var tipos=s.tipos&&s.tipos.length?s.tipos:[s.tipo||'Servicio general'];
+  var filas=tipos.map(function(t,i){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #252a3d">'
+      +'<span>'+t+'</span>'
+      +'<input type="number" id="rp'+i+'" data-tipo="'+t+'" placeholder="0" oninput="calcTotal()" style="background:#111420;border:1px solid #252a3d;border-radius:6px;padding:4px 8px;color:#f0f0f0;font-size:13px;width:130px;text-align:right">'
+      +'</div>';
+  }).join('');
+  var h='<div style="display:flex;flex-direction:column;gap:14px">'
+    +'<div style="background:#111420;border:1px solid #252a3d;border-radius:10px;padding:14px">'
+    +'<div style="font-weight:800;font-size:15px;color:#f5a623">Lubrand Lubricentro</div>'
+    +'<div style="font-size:11px;color:#8892a4;margin-bottom:10px">Av. Agustín Alvarez N° 1179 • 2317-533031</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px">'
+    +'<div><span style="color:#8892a4">Cliente: </span><strong>'+(c.nombre||'—')+'</strong></div>'
+    +'<div><span style="color:#8892a4">Fecha: </span><strong>'+s.fecha+'</strong></div>'
+    +'<div><span style="color:#8892a4">Vehículo: </span><strong>'+(v.marca||'')+' '+(v.modelo||'')+'</strong></div>'
+    +'<div><span style="color:#8892a4">Patente: </span><strong>'+(v.patente||'—')+'</strong></div>'
+    +'<div><span style="color:#8892a4">KM: </span><strong>'+(s.km?Number(s.km).toLocaleString()+' km':'—')+'</strong></div>'
+    +'<div><span style="color:#8892a4">Próx service: </span><strong>'+(s.proximaFecha||'—')+'</strong></div>'
+    +'</div></div>'
+    +'<div>'
+    +'<div style="font-size:13px;color:#8892a4;margin-bottom:6px">Ingresá el precio de cada servicio:</div>'
+    +filas
+    +'<div style="display:flex;justify-content:flex-end;padding-top:10px;font-size:18px;font-weight:800;color:#22c55e">TOTAL: <span id="rtotal" style="margin-left:8px">$0</span></div>'
+    +'</div>'
+    +'<div class="row" style="gap:8px;flex-wrap:wrap">'
+    +'<button class="btn-wa" onclick="enviarRemito()">📱 Enviar por WhatsApp</button>'
+    +'<button class="btn btn-blu btn-sm" onclick="guardarCuenta()">💼 Cuenta corriente</button>'
+    +'<button class="btn btn-grn btn-sm" onclick="closeModal()">✓ Cerrar</button>'
+    +'</div></div>';
+  openModal('🧾 Remito de Servicio', h, true);
+}
+function calcTotal(){
+  var inputs=document.querySelectorAll('[id^=rp]');
+  var t=0;inputs.forEach(function(i){t+=Number(i.value||0);});
+  var el=document.getElementById('rtotal');
+  if(el)el.textContent=fmt$(t);
+}
+function getPrecios(){
+  var inputs=document.querySelectorAll('[id^=rp]');
+  var precios={};var total=0;
+  inputs.forEach(function(i){var p=Number(i.value||0);precios[i.dataset.tipo]=p;total+=p;});
+  return {precios:precios,total:total};
+}
+function enviarRemito(){
+  var s=DB.servicios.find(function(x){return x.id==remitoId;});
+  if(!s)return;
+  var v=DB.vehiculos.find(function(x){return x.id===s.vehiculoId;})||{};
+  var c=DB.clientes.find(function(x){return x.id===v.clienteId;})||{};
+  if(!c.telefono){alert('El cliente no tiene teléfono cargado.');return;}
+  var pd=getPrecios();
+  var tipos=s.tipos&&s.tipos.length?s.tipos:[s.tipo||'Servicio general'];
+  var lineas=tipos.map(function(t){var p=pd.precios[t]||0;return '• '+t+(p?' — $'+p.toLocaleString('es-AR'):'');}).join('\n');
+  var msg='🧾 *REMITO DE SERVICIO*\n*Lubrand Lubricentro*\nAv. Agustín Alvarez N° 1179 • 2317-533031\n\n'
+    +'👤 *Cliente:* '+(c.nombre||'')+'\n'
+    +'🚗 *Vehículo:* '+(v.marca||'')+' '+(v.modelo||'')+' ('+(v.patente||'')+')\n'
+    +'📅 *Fecha:* '+s.fecha+'\n'
+    +'🔢 *KM:* '+(s.km?Number(s.km).toLocaleString()+' km':'—')+'\n\n'
+    +'*Servicios realizados:*\n'+lineas+'\n\n'
+    +'💰 *TOTAL: $'+pd.total.toLocaleString('es-AR')+'*'
+    +(s.proximaFecha?'\n\n⚠️ Próximo service: '+fmtF(s.proximaFecha):'')+'\n\n_Gracias por elegirnos 🛢️_';
+  DB.servicios=DB.servicios.map(function(x){return x.id==remitoId?Object.assign({},x,{costo:pd.total}):x;});
+  saveDB();
+  wa(c.telefono,msg);
+}
+function guardarCuenta(){
+  var s=DB.servicios.find(function(x){return x.id==remitoId;});
+  if(!s)return;
+  var v=DB.vehiculos.find(function(x){return x.id===s.vehiculoId;})||{};
+  var pd=getPrecios();
+  DB.servicios=DB.servicios.map(function(x){return x.id==remitoId?Object.assign({},x,{costo:pd.total,enCuenta:true}):x;});
+  var cid=v.clienteId;
+  var cuenta=DB.cuentas.find(function(c){return c.clienteId==cid&&c.abierta;});
+  if(cuenta){cuenta.servicios.push(remitoId);cuenta.total=(cuenta.total||0)+pd.total;}
+  else DB.cuentas.push({id:uid(),clienteId:cid,servicios:[remitoId],total:pd.total,abierta:true,fecha:today()});
+  saveDB();closeModal();
+  var cli=DB.clientes.find(function(c){return c.id===cid;})||{};
+  alert('✅ Guardado en cuenta corriente de '+(cli.nombre||'cliente'));
+}
+
+// ── TURNOS ────────────────────────────────────────────────────────────────────
+var turnoFecha='';
+function renderTurnos(){
+  if(!turnoFecha)turnoFecha=today();
+  var list=DB.turnos.filter(function(t){return !turnoFecha||t.fecha===turnoFecha;}).sort(function(a,b){return a.hora.localeCompare(b.hora);});
+  var h='<div class="row" style="justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">'
+    +'<div style="font-weight:700;font-size:16px">📅 Turnos</div>'
+    +'<div class="row" style="gap:8px">'
+    +'<input type="date" value="'+turnoFecha+'" oninput="turnoFecha=this.value;renderTurnos()" style="background:#111420;border:1px solid #252a3d;border-radius:8px;padding:8px 12px;color:#f0f0f0;font-size:14px;outline:none">'
+    +'<button onclick="turnoFecha=\'\';renderTurnos()" style="background:none;border:1px solid #252a3d;border-radius:8px;padding:8px 10px;color:#8892a4;cursor:pointer;font-size:12px">Todos</button>'
+    +'<button class="btn btn-acc" onclick="abrirTurno()">+ Turno</button>'
+    +'</div></div>';
+  if(!list.length)h+='<div class="card" style="text-align:center;color:#8892a4;padding:30px">No hay turnos.</div>';
+  var EST={pendiente:{cls:'by',lbl:'Pendiente'},completado:{cls:'bg',lbl:'Completado'},cancelado:{cls:'br',lbl:'Cancelado'}};
+  list.forEach(function(t){
+    var c=DB.clientes.find(function(x){return x.id===t.clienteId;})||{};
+    var v=DB.vehiculos.find(function(x){return x.id===t.vehiculoId;})||{};
+    var est=EST[t.estado]||EST.pendiente;
+    var msgT=buildMsgTurno(t,c,v);
+    h+='<div class="card"><div class="row" style="justify-content:space-between">'
+      +'<div class="row" style="gap:14px">'
+      +'<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:#f5a623">'+t.hora+'</div><div style="font-size:10px;color:#8892a4">'+t.fecha+'</div></div>'
+      +'<div><div style="font-weight:700">'+(c.nombre||'')+'</div>'
+      +'<div style="color:#8892a4;font-size:13px">'+(v.patente?v.patente+' • ':'')+' '+(v.marca||'')+' '+(v.modelo||'')+'</div>'
+      +'<div style="color:#8892a4;font-size:13px">'+t.servicio+(t.notas?' — '+t.notas:'')+'</div></div>'
+      +'</div>'
+      +'<div class="row" style="gap:6px;flex-wrap:wrap">'
+      +'<span class="badge '+est.cls+'">'+est.lbl+'</span>'
+      +'<button class="btn-wa" onclick="wa(\''+encodeURI(c.telefono||'')+'\',decodeURI(\''+encodeURI(msgT)+'\'))"><svg width="13" height="13" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> WhatsApp</button>'
+      +(t.estado==='pendiente'?'<button class="btn btn-grn btn-sm" onclick="confirmarTurno(\''+t.id+'\')">✓ Confirmar</button><button class="btn btn-red btn-sm" onclick="estadoTurno(\''+t.id+'\',\'cancelado\')">✕</button>':'')
+      +'<button class="btn btn-red btn-sm" onclick="delTurno(\''+t.id+'\')">🗑</button>'
+      +'</div></div></div>';
+  });
+  document.getElementById('content').innerHTML=h;
+}
+function buildMsgTurno(t,c,v){
+  var dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  var f=new Date(t.fecha+'T12:00:00');
+  var p=t.fecha.split('-');
+  return 'Hola '+(c.nombre||'')+' 👋 Te recordamos que tenés un turno en *Lubrand Lubricentro* el *'+dias[f.getDay()]+' '+p[2]+'/'+p[1]+'/'+p[0]+'* a las *'+t.hora+' hs* para *'+t.servicio+'*'+(v.marca?' de tu '+v.marca+' '+v.modelo:'')+'. ¡Te esperamos! 🛢️\n\n_Mensaje automático, no responder._';
+}
+function abrirTurno(){
+  var cliOpts=DB.clientes.map(function(c){return '<option value="'+c.id+'">'+(c.nombre||'')+'</option>';}).join('');
+  openModal('Nuevo Turno',
+    '<div style="display:flex;flex-direction:column;gap:12px">'
+    +'<div class="fg">'
+    +'<div class="ff"><label>Fecha</label><input type="date" id="tf" value="'+(turnoFecha||today())+'"></div>'
+    +'<div class="ff"><label>Hora</label><input type="time" id="th" value="09:00"></div>'
+    +'</div>'
+    +'<div class="ff"><label>Cliente</label><select id="tc" onchange="cargarVehTurno()"><option value="">— Seleccionar cliente —</option>'+cliOpts+'</select></div>'
+    +'<div class="ff"><label>Vehículo</label><select id="tv"><option value="">— Seleccionar vehículo —</option></select></div>'
+    +'<div class="ff"><label>Servicio</label><select id="ts">'+SERVS.map(function(s){return '<option>'+s+'</option>';}).join('')+'</select></div>'
+    +'<div class="ff"><label>Notas (opcional)</label><input id="tn"></div>'
+    +'<button class="btn btn-acc" style="margin-top:4px" onclick="saveTurno()">Guardar y enviar WhatsApp</button>'
+    +'</div>');
+}
+function cargarVehTurno(){
+  var cid=document.getElementById('tc').value;
+  var vehs=DB.vehiculos.filter(function(v){return v.clienteId==cid;});
+  document.getElementById('tv').innerHTML='<option value="">— Seleccionar vehículo —</option>'+vehs.map(function(v){return '<option value="'+v.id+'">'+(v.patente||'')+' — '+(v.marca||'')+' '+(v.modelo||'')+'</option>';}).join('');
+}
+function saveTurno(){
+  var fecha=document.getElementById('tf').value;
+  var cid=document.getElementById('tc').value;
+  if(!fecha||!cid){alert('Completá fecha y cliente.');return;}
+  var t={id:uid(),fecha:fecha,hora:document.getElementById('th').value,clienteId:cid,vehiculoId:document.getElementById('tv').value,servicio:document.getElementById('ts').value,notas:document.getElementById('tn').value,estado:'pendiente'};
+  DB.turnos.push(t);saveDB();closeModal();renderTurnos();
+  var c=DB.clientes.find(function(x){return x.id==cid;})||{};
+  var v=DB.vehiculos.find(function(x){return x.id==t.vehiculoId;})||{};
+  if(c.telefono)setTimeout(function(){wa(c.telefono,buildMsgTurno(t,c,v));},300);
+}
+function confirmarTurno(id){
+  estadoTurno(id,'completado');
+  var t=DB.turnos.find(function(x){return x.id==id;});
+  if(!t)return;
+  // Auto crear servicio
+  tiposSel=[t.servicio];
+  setTimeout(function(){abrirSrvDesdeTurno(t);},300);
+}
+function abrirSrvDesdeTurno(t){
+  var c=DB.clientes.find(function(x){return x.id===t.clienteId;})||{};
+  var v=DB.vehiculos.find(function(x){return x.id===t.vehiculoId;})||{};
+  tiposSel=[t.servicio];
+  var tbh=TIPOS.map(function(x){return '<button class="tipo-btn'+(tiposSel.includes(x)?' sel':'')+'" onclick="togTipo(\''+x+'\')">'+(tiposSel.includes(x)?'✓ ':'')+x+'</button>';}).join('');
+  openModal('✅ Completar servicio — '+(c.nombre||''),
+    '<div style="background:#22c55e22;border:1px solid #22c55e;border-radius:8px;padding:10px;font-size:13px;color:#22c55e;margin-bottom:14px">Turno confirmado. Completá los detalles.</div>'
+    +'<div style="display:flex;flex-direction:column;gap:14px">'
+    +'<div class="ff"><label>Vehículo</label><input value="'+(v.patente||'')+' — '+(v.marca||'')+' '+(v.modelo||'')+'" disabled style="background:#111420;border:1px solid #252a3d;border-radius:8px;padding:8px 12px;color:#8892a4;font-size:14px;width:100%"></div>'
+    +'<div><div style="font-size:13px;color:#8892a4;margin-bottom:8px">Servicios realizados</div><div id="tgrid" style="display:flex;flex-wrap:wrap;gap:8px">'+tbh+'</div></div>'
+    +'<div class="fg">'
+    +'<div class="ff"><label>Fecha</label><input type="date" id="sf" value="'+t.fecha+'" oninput="autoF(this.value)"></div>'
+    +'<div class="ff"><label>KM actuales</label><input type="number" id="sk" oninput="autoK(this.value)"></div>'
+    +'<div class="ff"><label>Próximo (fecha)</label><input type="date" id="spf"></div>'
+    +'<div class="ff"><label>Próximo (km)</label><input type="number" id="spk"></div>'
+    +'</div>'
+    +'<div class="ff"><label>Detalle / producto</label><input id="sd"></div>'
+    +'<div class="ff"><label>💲 Valor cobrado ($)</label><input type="number" id="sc"></div>'
+    +'<button class="btn btn-acc" style="margin-top:4px" onclick="saveSrvDesdeTurno(\''+t.vehiculoId+'\')">✅ Guardar y generar remito</button>'
+    +'</div>');
+  autoF(t.fecha);
+}
+function saveSrvDesdeTurno(vid){
+  var fecha=document.getElementById('sf').value;
+  var tipo=tiposSel.length?tiposSel.join(' + '):'Servicio general';
+  var s={id:uid(),vehiculoId:vid,fecha:fecha,tipo:tipo,tipos:tiposSel.slice(),
+    km:document.getElementById('sk').value,detalle:document.getElementById('sd').value,
+    costo:document.getElementById('sc').value,
+    proximaFecha:document.getElementById('spf').value,
+    proximoKm:document.getElementById('spk').value,estado:'completado'};
+  DB.servicios.push(s);
+  if(s.km)DB.vehiculos=DB.vehiculos.map(function(v){return v.id==vid?Object.assign({},v,{km:s.km}):v;});
+  saveDB();closeModal();
+  setTimeout(function(){abrirRemito(s.id);},300);
+}
+function estadoTurno(id,estado){
+  DB.turnos=DB.turnos.map(function(t){return t.id==id?Object.assign({},t,{estado:estado}):t;});
+  saveDB();renderTurnos();
+}
+function delTurno(id){
+  DB.turnos=DB.turnos.filter(function(t){return t.id!=id;});
+  saveDB();renderTurnos();
+}
+
+// ── FACTURACIÓN ───────────────────────────────────────────────────────────────
+var factMes='';
+function renderFact(){
+  if(!factMes)factMes=today().slice(0,7);
+  var list=DB.servicios.filter(function(s){return !factMes||s.fecha.startsWith(factMes);});
+  var total=list.reduce(function(a,s){return a+Number(s.costo||0);},0);
+  var h='<div class="row" style="justify-content:space-between;margin-bottom:16px">'
+    +'<div style="font-weight:700;font-size:16px">💰 Facturación</div>'
+    +'<input type="month" value="'+factMes+'" oninput="factMes=this.value;renderFact()" style="background:#111420;border:1px solid #252a3d;border-radius:8px;padding:8px 12px;color:#f0f0f0;font-size:14px;outline:none">'
+    +'</div>'
+    +'<div class="stats">'
+    +'<div class="stat"><div style="color:#8892a4;font-size:13px">Total</div><div style="font-size:28px;font-weight:800;color:#22c55e">'+fmt$(total)+'</div></div>'
+    +'<div class="stat"><div style="color:#8892a4;font-size:13px">Servicios</div><div style="font-size:28px;font-weight:800;color:#f5a623">'+list.length+'</div></div>'
+    +'<div class="stat"><div style="color:#8892a4;font-size:13px">Promedio</div><div style="font-size:28px;font-weight:800;color:#3b82f6">'+fmt$(list.length?Math.round(total/list.length):0)+'</div></div>'
+    +'</div>'
+    +'<div class="card"><div style="font-weight:700;margin-bottom:12px">Detalle</div>';
+  if(!list.length)h+='<div style="text-align:center;color:#8892a4;padding:20px">Sin registros</div>';
+  list.sort(function(a,b){return b.fecha.localeCompare(a.fecha);}).forEach(function(s){
+    var v=DB.vehiculos.find(function(x){return x.id===s.vehiculoId;})||{};
+    var c=DB.clientes.find(function(x){return x.id===v.clienteId;})||{};
+    h+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #252a3d">'
+      +'<div><div style="font-weight:600">'+(s.tipo||'')+'</div><div style="color:#8892a4;font-size:12px">'+s.fecha+' • '+(c.nombre||'')+' • '+(v.patente||'')+'</div></div>'
+      +'<div style="color:#22c55e;font-weight:700">'+fmt$(s.costo)+'</div></div>';
+  });
+  if(list.length)h+='<div style="display:flex;justify-content:flex-end;padding-top:12px;font-weight:800;font-size:18px;color:#22c55e">TOTAL: '+fmt$(total)+'</div>';
+  h+='</div>';
+  document.getElementById('content').innerHTML=h;
+}
+
+// ── CUENTAS CORRIENTES ────────────────────────────────────────────────────────
+function renderCuentas(){
+  var abiertas=DB.cuentas.filter(function(c){return c.abierta;});
+  var h='<div style="font-weight:700;font-size:16px;margin-bottom:16px">💼 Cuentas Corrientes</div>';
+  if(!abiertas.length)h+='<div class="card" style="text-align:center;color:#8892a4;padding:30px">No hay cuentas abiertas.</div>';
+  abiertas.forEach(function(cuenta){
+    var cli=DB.clientes.find(function(c){return c.id===cuenta.clienteId;})||{};
+    var srvs=cuenta.servicios.map(function(id){return DB.servicios.find(function(s){return s.id==id;});}).filter(Boolean);
+    h+='<div class="card">'
+      +'<div class="row" style="justify-content:space-between;margin-bottom:12px">'
+      +'<div><div style="font-weight:700;font-size:16px">'+(cli.nombre||'—')+'</div>'
+      +'<div style="color:#8892a4;font-size:13px">'+srvs.length+' servicio(s) desde '+cuenta.fecha+'</div></div>'
+      +'<div style="font-size:22px;font-weight:800;color:#22c55e">'+fmt$(cuenta.total||0)+'</div>'
+      +'</div>';
+    srvs.forEach(function(s){h+='<div style="font-size:12px;color:#8892a4;padding:4px 0;border-bottom:1px solid #252a3d">'+s.fecha+' — '+(s.tipo||'')+' — '+fmt$(s.costo)+'</div>';});
+    h+='<div class="row" style="gap:8px;margin-top:12px">'
+      +'<button class="btn-wa" onclick="enviarCuenta(\''+cuenta.id+'\')">📱 Enviar resumen</button>'
+      +'<button class="btn btn-red btn-sm" onclick="cerrarCuenta(\''+cuenta.id+'\')">Cerrar cuenta</button>'
+      +'</div></div>';
+  });
+  document.getElementById('content').innerHTML=h;
+}
+function enviarCuenta(cid){
+  var cuenta=DB.cuentas.find(function(c){return c.id==cid;});
+  if(!cuenta)return;
+  var cli=DB.clientes.find(function(c){return c.id===cuenta.clienteId;})||{};
+  if(!cli.telefono){alert('El cliente no tiene teléfono.');return;}
+  var srvs=cuenta.servicios.map(function(id){return DB.servicios.find(function(s){return s.id==id;});}).filter(Boolean);
+  var lineas=srvs.map(function(s){return '• '+s.fecha+' — '+(s.tipo||'')+' — $'+Number(s.costo||0).toLocaleString('es-AR');}).join('\n');
+  var msg='🧾 *RESUMEN DE CUENTA CORRIENTE*\n*Lubrand Lubricentro*\n\n'
+    +'👤 *Cliente:* '+(cli.nombre||'')+'\n\n'
+    +'*Servicios:*\n'+lineas+'\n\n'
+    +'💰 *TOTAL: $'+Number(cuenta.total||0).toLocaleString('es-AR')+'*\n\n'
+    +'_Gracias por elegirnos 🛢️_';
+  wa(cli.telefono,msg);
+}
+function cerrarCuenta(id){
+  if(!confirm('¿Cerrar esta cuenta?'))return;
+  DB.cuentas=DB.cuentas.map(function(c){return c.id==id?Object.assign({},c,{abierta:false}):c;});
+  saveDB();renderCuentas();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+loadDB();
+render();
+</script>
+</body>
+</html>
